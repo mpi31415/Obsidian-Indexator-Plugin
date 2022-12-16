@@ -1,0 +1,1 @@
+# Obsidian-Indexator-Plugin

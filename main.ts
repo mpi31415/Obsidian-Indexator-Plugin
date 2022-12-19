@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, MarkdownEditView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, Vault, View, Workspace, WorkspaceLeaf, TextFileView, TFolder } from 'obsidian';
+import { App, Plugin, PluginSettingTab,Vault} from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 

@@ -55,10 +55,30 @@ function getAllFolders(folder: TFolder){
 
 
 function index(folderStates: Map<TFolder,boolean>){
-	folderStates.forEach((state, fol)=>{
-		if(state)
-			app.vault.create(fol.path+"/Index.md","");
+	folderStates.forEach(async (state, fol)=>{
+		if(state){
+			let file: TFile;
+			await app.vault.create(fol.path+"/Index.md","").catch(()=>{
+		
+				let abstractFile = app.vault.getAbstractFileByPath(fol.path+"/Index.md");
+				if(abstractFile instanceof TFile)
+					file = abstractFile;
+				alert(file.name);	
+			}).then((self)=>{
+				if(!(self instanceof TFile)){
+					return 
+				}
+				file = self;
+				app.vault.append(file, "hello");
+			});
+			
+			
+			
+		}
+			
 	});
+
+
 }
 class IndexatorSettingTab extends PluginSettingTab {
 	

@@ -41,8 +41,6 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-
-
 function getAllFolders(folder: TFolder){
 	let allFolders: TFolder[] = new Array<TFolder>;
 	folder.children.forEach((file)=>{
@@ -53,24 +51,41 @@ function getAllFolders(folder: TFolder){
 	 return allFolders;
 }
 
+function createIndexString(file: TFile){
+	return "- ["+file.basename+"]("+file.path+")"+"\n";
+}
 
 function index(folderStates: Map<TFolder,boolean>){
 	folderStates.forEach(async (state, fol)=>{
 		if(state){
 			let file: TFile;
-			await app.vault.create(fol.path+"/Index.md","").catch(()=>{
-		
+			await app.vault.create(fol.path+"/Index.md","").catch(()=>
+			{	
 				let abstractFile = app.vault.getAbstractFileByPath(fol.path+"/Index.md");
-				if(abstractFile instanceof TFile)
+				if(abstractFile instanceof TFile){
 					file = abstractFile;
-				alert(file.name);	
-			}).then((self)=>{
+					app.vault.modify(file,"");
+					fol.children.forEach((self2)=>{
+						if(self2 instanceof TFile && self2.basename!=="Index"){
+							console.log(self2.basename);
+							app.vault.append(file, createIndexString(self2));
+						}
+					})
+			}
+		}).then((self)=>{
 				if(!(self instanceof TFile)){
 					return 
 				}
 				file = self;
-				app.vault.append(file, "hello");
+				app.vault.modify(file,"");
+				fol.children.forEach((self2)=>{
+					if(self2 instanceof TFile && self2.basename !="Index.md"){
+						console.log("new line");
+						app.vault.append(file,createIndexString(self2));
+					}
+				});
 			});
+			
 			
 			
 			
@@ -99,7 +114,7 @@ class IndexatorSettingTab extends PluginSettingTab {
 		
 		containerEl.empty();
 		
-		containerEl.createEl("h2",{text:"Folders to be indexed, untick all those which are not supposed to be indexed"});
+		containerEl.createEl("h2",{text:"Folders to be indexed, untick all those which are not supposed to be indexed."});
 		for(let a of allFolders){
 			new Setting(containerEl)
 				.setName(a.name)
@@ -112,12 +127,13 @@ class IndexatorSettingTab extends PluginSettingTab {
 			});	
 		}
 		
+		new Setting(containerEl).setName("\nNote that the \"Index\" Button will recreate the Index file from scratch, causing performance issues ");
 		new Setting(containerEl).addButton((bt)=>{
 			bt.setButtonText("Index");
 			bt.onClick(()=>{
 				index(foldersStates);
 			});
-		});		
+		});	
 	
 		containerEl.show();
 
